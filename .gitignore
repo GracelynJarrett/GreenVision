@@ -1,1 +1,81 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Pyre type checker
+.pyre/
+
+# MyPy
+.mypy_cache/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Jupyter Notebook output and runtime files
+*.nbconvert.ipynb
+
+# VS Code settings
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Data and model artifacts (large files)
+data/
+datasets/
+raw_data/
+processed_data/
+models/
+checkpoints/
+saved_models/
+*.ckpt
+*.h5
+*.pt
+*.pth
+
+# Secrets and environment files
+.env
+.env.*
+
+# OneDrive temporary files
+~$*
+
+# Temporary files
+*.tmp
+*.swp
+*~
 

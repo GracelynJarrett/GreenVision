@@ -1,0 +1,39 @@
+Main desitions 
+1. Split the Train and tune into two different files
+    This will alow for easy changes to hyprotuning and if there is an error it can be found easyer
+
+2. During training have Augmentation and Normalizaion 
+    this will alow the model to match feature distributions later down the line
+    
+3. During Tune play around with
+    Rotaion/Color
+    Freezing 
+    Batch Size
+    Regularization mextrics
+
+4. Regulatization, uses all Thriee
+    Dropout = randomly disable neurons during training.
+    Weight decay = discourage large weights.
+    Early stopping = stop training when validation performance stops getting better.
+
+5. Architecture desitions
+    Main app files
+        train.py
+        tune.py
+        validate.py
+        app.py
+        dashboard.py
+    Support files 
+        model.py - Have helper funtions 
+            Holdes the classifer head, frezzing logic, fine-tuning helper
+        dataset.py
+            Handels loading and image and preparing it for model traing
+        utils.py
+            Save helper code, like mapping, ckeckpoints and calculating Metrics
+        config.yaml
+            Keeps constent metrics like batch size, epochs, augmentation strenght and early stopping
+        requirements.txt
+
+
+        
+How to load in images? have a test set?  presive the order of the class (mapping)
