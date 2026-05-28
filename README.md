@@ -1,47 +1,94 @@
 # GreenVision
 
-GreenVision is a small image-classification project created for the Applied Machine Learning course (Spring 2026). It contains experiments and notebooks for training and evaluating convolutional neural networks on example datasets (see `mnist_cnn.ipynb`).
+GreenVision is a plant leaf disease classification project created for the Applied Machine Learning course (Spring 2026). It predicts disease labels from PlantVillage images using transfer learning with EfficientNet-B0, a custom classifier head, and a FastAPI inference service.
 
-Features
-- Example CNN training and evaluation in `mnist_cnn.ipynb`
-- Lightweight project structure suitable for coursework and experiments
+## Features
 
-Repository structure
-- `mnist_cnn.ipynb` — main notebook with model definition, training, and evaluation
-- `data/` — (ignored) dataset files and downloads
-- `models/` — (ignored) saved model checkpoints and artifacts
-- `scr/` — source code (if present)
-- `models/` — saved model artifacts (ignored by .gitignore)
-- `IMPLEMENTATION_GUIDE.md` — project notes and implementation plan
+- Transfer learning with EfficientNet-B0 backbone (ImageNet pretrained)
+- Two-phase training strategy: feature extraction (frozen backbone) followed by fine-tuning
+- Data augmentation and validation pipeline with ImageNet normalization
+- MLflow experiment tracking for reproducibility
+- FastAPI service for model inference with confidence scoring
+- Comprehensive implementation guide with architectural decisions and code snippets
 
-Setup
-1. Create and activate a Python virtual environment (recommended):
+## Repository Structure
+
+- `IMPLEMENTATION_GUIDE.md` — detailed architecture decisions and design rationale
+- `.github/copilot-instructions.md` — AI assistant context
+- `.github/agent.md` — autonomous agent guardrails
+- `doc/` — project documentation
+  - `Implementation_Log.md` — progress tracking
+  - `Research_Log.md` — research notes
+- `data/` — PlantVillage dataset (ignored)
+- `models/` — saved model checkpoints (ignored)
+- `src/` — source code modules
+- `mnist_cnn.ipynb` — reference notebook (legacy)
+
+## Setup
+
+1. Create and activate a Python virtual environment:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate
+.\.\.venv\Scripts\Activate
 ```
 
-2. Install dependencies (if a `requirements.txt` exists):
+2. Install dependencies:
 
 ```powershell
 pip install -r requirements.txt
 ```
 
-If no `requirements.txt` is provided, a typical environment includes `numpy`, `torch` or `tensorflow` (depending on the notebook), `scikit-learn`, and `jupyter`.
+Required packages: PyTorch, torchvision, EfficientNet, FastAPI, MLflow, Pillow, scikit-learn, and numpy.
 
-Usage
-- To run the experiments, open `mnist_cnn.ipynb` in Jupyter Notebook or JupyterLab and follow the cells.
-- Training and evaluation code is included in the notebook; adapt hyperparameters and dataset paths as needed.
+## Usage
 
-Data and models
-- Large datasets and model files are ignored by `.gitignore`. Keep dataset downloads outside version control or add small sample data tracked in the repo.
+### Training (Phase 1 + Phase 2)
 
-Contributing
-- This repository is intended for coursework. For contributions or questions, please open an issue or contact the project owner.
+```bash
+python train.py --config configs/train.yaml
+```
 
-License
-- This project does not include an explicit license. Add one (for example, MIT) if you intend to share the code publicly.
+### Hyperparameter Tuning
+
+```bash
+python tune.py --config configs/tune.yaml
+```
+
+### Model Validation
+
+```bash
+python validate.py --model models/best.pth
+```
+
+### Running the Inference Service
+
+```bash
+uvicorn app:app --reload --port 8000
+```
+
+See `IMPLEMENTATION_GUIDE.md` for detailed architecture, training strategy, and hyperparameter defaults.
+
+## Data and Models
+
+- PlantVillage dataset (54,306 images, 38 classes) is ignored by `.gitignore`.
+- Model checkpoints and MLflow artifacts saved to `models/` (also ignored).
+- Class name mappings persisted as JSON artifacts for reproducible inference.
+
+## Documentation
+
+- **IMPLEMENTATION_GUIDE.md** — Eight architecture decisions with code snippets and citations.
+- **.github/copilot-instructions.md** — Project context and code conventions.
+- **.github/agent.md** — Guardrails for autonomous tool behavior.
+- **doc/Implementation_Log.md** — Progress tracking and session notes.
+
+## Contributing
+
+This repository is intended for coursework. Follow conventions in `.github/copilot-instructions.md`. For questions, open an issue or contact the project owner.
+
+## License
+
+This project does not include an explicit license. Add one (for example, MIT) if you intend to share the code publicly.
 
 Contact
 - For questions about the code or assignments, reach out to the course instructor or project owner.
