@@ -1,0 +1,119 @@
+# GreenVision configuration
+#
+# This file stores shared defaults used by train.py, tune.py, and validate.py.
+# Keep ImageNet normalization values unchanged so the pretrained EfficientNet
+# backbone sees the same input distribution during training and inference.
+
+project:
+  name: GreenVision
+  seed: 42
+  image_size: 224
+  num_classes: 38
+
+paths:
+  data_dir: data
+  model_dir: models
+  checkpoint_best: models/best_model.pth
+  checkpoint_phase1: models/phase1_best.pth
+  checkpoint_phase2: models/phase2_best.pth
+  class_to_idx: models/class_to_idx.json
+  idx_to_class: models/idx_to_class.json
+  logs_dir: logs
+  mlflow_artifacts_dir: mlruns
+
+mlflow:
+  experiment_name: GreenVision
+  tracking_uri: null
+  ui_port: 5000
+  run_name_phase1: phase1_feature_extraction
+  run_name_phase2: phase2_fine_tuning
+  log_system_metrics: true
+  nested_runs: false
+
+model:
+  backbone: efficientnet_b0
+  pretrained: true
+  feature_dim: 1280
+  hidden_dim: 128
+  dropout: 0.5
+
+augmentation:
+  train:
+    random_resized_crop:
+      scale: [0.8, 1.0]
+    horizontal_flip_prob: 0.5
+    vertical_flip_prob: 0.5
+    rotation_degrees: 15
+    color_jitter:
+      brightness: 0.1
+      contrast: 0.1
+      saturation: 0.1
+      hue: 0.05
+  validation:
+    resize: 256
+    center_crop: 224
+  normalization:
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+
+splits:
+  train: 0.75
+  validation: 0.15
+  test: 0.10
+  validation_images: true
+
+training:
+  batch_size: 16
+  num_workers: 0
+  pin_memory: false
+  phase1:
+    epochs: 8
+    learning_rate: 0.001
+    weight_decay: 0.0001
+    freeze_backbone: true
+  phase2:
+    epochs: 8
+    learning_rate: 0.0001
+    weight_decay: 0.0001
+    unfreeze_backbone: true
+  regularization:
+    dropout: 0.5
+    weight_decay: 0.0001
+    early_stopping_patience: 8
+    early_stopping_min_delta: 0.0
+  optimization:
+    optimizer: adam
+    scheduler: reduce_on_plateau
+    scheduler_patience: 3
+    scheduler_factor: 0.5
+
+validation:
+  batch_size: 16
+  num_workers: 0
+  pin_memory: false
+  save_confusion_matrix: true
+  evaluate_each_phase: true
+
+checkpointing:
+  monitor: val_loss
+  mode: min
+  save_best_only: true
+  save_every_phase: true
+  include_optimizer_state: false
+
+logging:
+  level: INFO
+  log_to_file: true
+  console_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Tuning defaults for tune.py. These are starting ranges, not final values.
+tuning:
+  rotation_degrees: [10, 15, 20]
+  color_jitter_strength: [0.05, 0.1, 0.2]
+  batch_sizes: [8, 16, 32]
+  freeze_backbone_options: [true, false]
+  dropout_values: [0.3, 0.5, 0.6]
+  learning_rates:
+    phase1: [0.001, 0.0005]
+    phase2: [0.0001, 0.00005]
+  weight_decay_values: [0.0001, 0.0005]
