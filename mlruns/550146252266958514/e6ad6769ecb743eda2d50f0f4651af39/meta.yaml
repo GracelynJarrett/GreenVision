@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/Gracelyn/OneDrive - Neumont College of Computer Science/Attachments/Desktop/Neumont/Year3_AI/Spring_2026/Applied
+  Machine Learning/GreenVision/mlruns/550146252266958514/e6ad6769ecb743eda2d50f0f4651af39/artifacts
+end_time: 1780103321941
+entry_point_name: ''
+experiment_id: '550146252266958514'
+lifecycle_stage: active
+run_id: e6ad6769ecb743eda2d50f0f4651af39
+run_name: phase1_feature_extraction
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1780094106818
+status: 3
+tags: []
+user_id: Gracelyn
