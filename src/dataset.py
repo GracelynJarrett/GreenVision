@@ -249,6 +249,152 @@ def make_datasets(
     return train_dataset, val_dataset, test_dataset, class_to_idx
 
 
+def get_transforms_from_config(augmentation_cfg: Dict[str, object], image_size: int = 224, *, train: bool = True):
+    """Return transforms built from config values while preserving defaults.
+
+    Args:
+        augmentation_cfg: Augmentation section from configuration.
+        image_size: Output image size.
+        train: If True, build training transforms; otherwise validation transforms.
+
+    Returns:
+        A `torchvision.transforms.Compose` transform.
+    """
+    train_cfg = augmentation_cfg.get("train", {}) if isinstance(augmentation_cfg, dict) else {}
+    val_cfg = augmentation_cfg.get("validation", {}) if isinstance(augmentation_cfg, dict) else {}
+    norm_cfg = augmentation_cfg.get("normalization", {}) if isinstance(augmentation_cfg, dict) else {}
+
+    mean = norm_cfg.get("mean", IMAGE_NET_MEAN)
+    std = norm_cfg.get("std", IMAGE_NET_STD)
+
+    if train:
+        scale = train_cfg.get("random_resized_crop", {}).get("scale", [0.8, 1.0])
+        horizontal_flip_prob = train_cfg.get("horizontal_flip_prob", 0.5)
+        vertical_flip_prob = train_cfg.get("vertical_flip_prob", 0.5)
+        rotation_degrees = train_cfg.get("rotation_degrees", 15)
+        color_jitter = train_cfg.get("color_jitter", {})
+        brightness = color_jitter.get("brightness", 0.1)
+        contrast = color_jitter.get("contrast", 0.1)
+        saturation = color_jitter.get("saturation", 0.1)
+        hue = color_jitter.get("hue", 0.05)
+
+        return transforms.Compose([
+            transforms.RandomResizedCrop(image_size, scale=(float(scale[0]), float(scale[1]))),
+            transforms.RandomHorizontalFlip(p=float(horizontal_flip_prob)),
+            transforms.RandomVerticalFlip(p=float(vertical_flip_prob)),
+            transforms.RandomRotation(degrees=float(rotation_degrees)),
+            transforms.ColorJitter(
+                brightness=float(brightness),
+                contrast=float(contrast),
+                saturation=float(saturation),
+                hue=float(hue),
+            ),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=mean, std=std),
+        ])
+
+    resize = val_cfg.get("resize", 256)
+    center_crop = val_cfg.get("center_crop", image_size)
+    return transforms.Compose([
+        transforms.Resize(int(resize)),
+        transforms.CenterCrop(int(center_crop)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=mean, std=std),
+    ])
+
+
+def make_datasets_with_transforms(
+    data_dir: str,
+    train_transform,
+    val_transform,
+    test_transform,
+    train_frac: float = 0.75,
+    val_frac: float = 0.15,
+    test_frac: float = 0.10,
+    seed: int = 42,
+    validate_images: bool = True,
+) -> Tuple[Dataset, Dataset, Dataset, Dict[str, int]]:
+    """Create stratified train/val/test datasets with caller-provided transforms."""
+    if not os.path.isdir(data_dir):
+        raise FileNotFoundError(f"data_dir not found: {data_dir}")
+
+    total = train_frac + val_frac + test_frac
+    if abs(total - 1.0) > 1e-6:
+        raise ValueError("train_frac + val_frac + test_frac must sum to 1.0")
+
+    base = _build_imagefolder(data_dir)
+    if len(base.samples) == 0:
+        raise ValueError(f"No images found under {data_dir}")
+
+    class_to_idx = base.class_to_idx
+
+    if validate_images:
+        valid_indices: List[int] = []
+        valid_targets: List[int] = []
+        for index, (path, target) in enumerate(base.samples):
+            try:
+                with Image.open(path) as img:
+                    img.verify()
+                valid_indices.append(index)
+                valid_targets.append(target)
+            except Exception:
+                logger.warning("Skipping invalid image: %s", path)
+
+        if len(valid_indices) == 0:
+            raise ValueError("No valid images found after validation pass")
+
+        indices = valid_indices
+        targets = valid_targets
+    else:
+        indices = list(range(len(base)))
+        targets = [sample[1] for sample in base.samples]
+
+    test_size = test_frac
+    trainval_size = 1.0 - test_size
+
+    try:
+        trainval_idx, test_idx = train_test_split(
+            indices, test_size=test_size, stratify=targets, random_state=seed
+        )
+    except ValueError:
+        logger.warning(
+            "Stratified split failed (small class counts). Falling back to non-stratified split."
+        )
+        trainval_idx, test_idx = train_test_split(indices, test_size=test_size, random_state=seed)
+
+    rel_val = val_frac / trainval_size if trainval_size > 0 else 0.0
+
+    try:
+        train_idx, val_idx = train_test_split(
+            trainval_idx,
+            test_size=rel_val,
+            stratify=[targets[i] for i in trainval_idx],
+            random_state=seed,
+        )
+    except ValueError:
+        logger.warning(
+            "Stratified train/val split failed (small class counts). Using non-stratified split."
+        )
+        train_idx, val_idx = train_test_split(trainval_idx, test_size=rel_val, random_state=seed)
+
+    train_folder = _build_imagefolder(data_dir, transform=train_transform)
+    val_folder = _build_imagefolder(data_dir, transform=val_transform)
+    test_folder = _build_imagefolder(data_dir, transform=test_transform)
+
+    train_dataset = Subset(train_folder, train_idx)
+    val_dataset = Subset(val_folder, val_idx)
+    test_dataset = Subset(test_folder, test_idx)
+
+    logger.info(
+        "Created tuned datasets: train=%d, val=%d, test=%d",
+        len(train_idx),
+        len(val_idx),
+        len(test_idx),
+    )
+
+    return train_dataset, val_dataset, test_dataset, class_to_idx
+
+
 def save_class_mapping(class_to_idx: Dict[str, int], path: str = "models/class_to_idx.json") -> None:
     """Persist `class_to_idx` mapping as JSON for use during inference.
 
