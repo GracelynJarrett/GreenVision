@@ -3,6 +3,21 @@
 This log tracks progress across branches and days. Each entry includes a summary of work completed since the last log. Newest entries appear at the top.
 ---
 
+## 2026-05-31 — Gracelyn — branch: phase2-tuning
+
+**Overview:** Completed all remaining tuning profiles (M3, M4, M5), selected M3 as the best model, and documented final model selection rationale in Model_metrix_Log.md.
+
+**Explanation:** Executed tuning profiles M3 (groups 4-6, best result at 99.41% test accuracy), M4 (groups 7-8, 95.73% test), and M5 (full backbone, 96.08% test) sequentially on GPU, with one interruption during M2 due to laptop power loss (successfully restarted). All runs completed with metrics automatically appended to `doc/Model_metrix_Log.md` by the tuning runner. Created a Model Comparison Summary table showing all models side-by-side and added a new "Final Model Selection: M3" section documenting why M3 was chosen: best tuning performance (99.41% test), excellent validation stability (99.40% best val, 0.0165 loss), and balanced backbone unfreezing strategy. Updated the metrics log to clarify that Base Phase 2 (99.50% test) is kept separate from tuning comparison per user decision, since Phase 2 included unplanned hyperparameter tuning not part of the original baseline.
+
+**Files touched:**
+- `logs/tune_m3.log`, `logs/tune_m4.log`, `logs/tune_m5.log` (runtime logs)
+- `models/m3_best.pth`, `models/m4_best.pth`, `models/m5_best.pth` (generated checkpoints)
+- `doc/Model_metrix_Log.md` (M3/M4/M5 metrics appended; added comparison table and Final Model Selection section)
+
+**Next step:** Create `phase3-validation` branch from current commit and set up formal validation workflow for M3 (confusion matrix, per-class accuracy, edge case inspection, prediction visualization).
+
+---
+
 ## 2026-05-30 — Gracelyn — branch: phase2-tuning
 
 **Overview:** Added a profile-driven tuning runner, tuning presets in `config.yaml`, and selective backbone-group unfreezing; executed and recorded the first tuning run (M2).

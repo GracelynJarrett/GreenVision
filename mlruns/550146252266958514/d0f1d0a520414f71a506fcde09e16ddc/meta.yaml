@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/Gracelyn/OneDrive - Neumont College of Computer Science/Attachments/Desktop/Neumont/Year3_AI/Spring_2026/Applied
+  Machine Learning/GreenVision/mlruns/550146252266958514/d0f1d0a520414f71a506fcde09e16ddc/artifacts
+end_time: 1780251211388
+entry_point_name: ''
+experiment_id: '550146252266958514'
+lifecycle_stage: active
+run_id: d0f1d0a520414f71a506fcde09e16ddc
+run_name: phase2_tuning_M4
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1780236806588
+status: 3
+tags: []
+user_id: Gracelyn
