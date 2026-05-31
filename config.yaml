@@ -27,6 +27,7 @@ mlflow:
   ui_port: 5000
   run_name_phase1: phase1_feature_extraction
   run_name_phase2: phase2_fine_tuning
+  run_name_tuning_prefix: phase2_tuning
   log_system_metrics: true
   nested_runs: false
 
@@ -98,6 +99,126 @@ checkpointing:
   monitor: val_loss
   mode: min
   save_best_only: true
+
+tuning:
+  enabled: true
+  default_total_backbone_groups: 8
+  defaults:
+    epochs: 8
+    batch_size: 24
+    learning_rate: 0.00005
+    weight_decay: 0.0001
+    dropout: 0.3
+    early_stopping_patience: 8
+    early_stopping_min_delta: 0.0
+    optimizer: adam
+    warmup_epochs: 1
+    min_lr_scale: 0.1
+  profiles:
+    M2:
+      description: Unfreeze beginning groups 1-3 with conservative augmentation.
+      trainable_groups: [1, 2, 3]
+      epochs: 8
+      batch_size: 24
+      learning_rate: 0.0001
+      weight_decay: 0.0001
+      dropout: 0.3
+      augmentation:
+        train:
+          random_resized_crop:
+            scale: [0.9, 1.1]
+          horizontal_flip_prob: 0.5
+          vertical_flip_prob: 0.0
+          rotation_degrees: 10
+          color_jitter:
+            brightness: 0.0
+            contrast: 0.0
+            saturation: 0.0
+            hue: 0.0
+        validation:
+          resize: 256
+          center_crop: 224
+        normalization:
+          mean: [0.485, 0.456, 0.406]
+          std: [0.229, 0.224, 0.225]
+    M3:
+      description: Unfreeze middle groups 4-6 with balanced augmentation.
+      trainable_groups: [4, 5, 6]
+      epochs: 8
+      batch_size: 24
+      learning_rate: 0.00005
+      weight_decay: 0.0001
+      dropout: 0.3
+      augmentation:
+        train:
+          random_resized_crop:
+            scale: [0.8, 1.2]
+          horizontal_flip_prob: 0.5
+          vertical_flip_prob: 0.0
+          rotation_degrees: 20
+          color_jitter:
+            brightness: 0.15
+            contrast: 0.15
+            saturation: 0.0
+            hue: 0.0
+        validation:
+          resize: 256
+          center_crop: 224
+        normalization:
+          mean: [0.485, 0.456, 0.406]
+          std: [0.229, 0.224, 0.225]
+    M4:
+      description: Unfreeze end groups 7-8 with stronger augmentation.
+      trainable_groups: [7, 8]
+      epochs: 8
+      batch_size: 16
+      learning_rate: 0.00005
+      weight_decay: 0.0001
+      dropout: 0.5
+      augmentation:
+        train:
+          random_resized_crop:
+            scale: [0.8, 1.2]
+          horizontal_flip_prob: 0.5
+          vertical_flip_prob: 0.5
+          rotation_degrees: 30
+          color_jitter:
+            brightness: 0.2
+            contrast: 0.2
+            saturation: 0.2
+            hue: 0.05
+        validation:
+          resize: 256
+          center_crop: 224
+        normalization:
+          mean: [0.485, 0.456, 0.406]
+          std: [0.229, 0.224, 0.225]
+    M5:
+      description: Unfreeze entire backbone with very strong augmentation.
+      trainable_groups: [1, 2, 3, 4, 5, 6, 7, 8]
+      epochs: 8
+      batch_size: 16
+      learning_rate: 0.00001
+      weight_decay: 0.0001
+      dropout: 0.6
+      augmentation:
+        train:
+          random_resized_crop:
+            scale: [0.6, 1.4]
+          horizontal_flip_prob: 0.5
+          vertical_flip_prob: 0.5
+          rotation_degrees: 45
+          color_jitter:
+            brightness: 0.2
+            contrast: 0.2
+            saturation: 0.2
+            hue: 0.1
+        validation:
+          resize: 256
+          center_crop: 224
+        normalization:
+          mean: [0.485, 0.456, 0.406]
+          std: [0.229, 0.224, 0.225]
   save_every_phase: true
   include_optimizer_state: false
 
@@ -105,15 +226,3 @@ logging:
   level: INFO
   log_to_file: true
   console_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-
-# Tuning defaults for tune.py. These are starting ranges, not final values.
-tuning:
-  rotation_degrees: [10, 15, 20]
-  color_jitter_strength: [0.05, 0.1, 0.2]
-  batch_sizes: [8, 16, 32]
-  freeze_backbone_options: [true, false]
-  dropout_values: [0.3, 0.5, 0.6]
-  learning_rates:
-    phase1: [0.001, 0.0005]
-    phase2: [0.0001, 0.00005]
-  weight_decay_values: [0.0001, 0.0005]

@@ -17,7 +17,7 @@ Architecture:
 from __future__ import annotations
 
 import logging
-from typing import Optional
+from typing import Iterable, List
 
 import torch
 import torch.nn as nn
@@ -123,6 +123,72 @@ class DiseaseClassifier(nn.Module):
             param.requires_grad = True
 
         logger.info("Backbone unfrozen: requires_grad=True for all backbone parameters")
+
+    def set_trainable_backbone_groups(self, group_indices: Iterable[int], total_groups: int = 8) -> None:
+        """Freeze backbone, then unfreeze only selected grouped backbone blocks.
+
+        This helper supports tuning experiments where only specific contiguous
+        portions of the EfficientNet backbone should be trainable (for example,
+        groups 1-3, 4-6, or 7-8). Grouping is computed dynamically from the
+        number of available blocks to avoid hard-coding architecture internals.
+
+        Args:
+            group_indices: 1-based group indices to unfreeze.
+            total_groups: Number of groups used to partition backbone blocks.
+
+        Raises:
+            ValueError: If no backbone blocks are available or group indices are invalid.
+        """
+        if total_groups <= 0:
+            raise ValueError(f"total_groups must be > 0, got {total_groups}")
+
+        blocks = self._get_backbone_blocks()
+        if not blocks:
+            raise ValueError("Backbone does not expose blocks for grouped unfreezing")
+
+        selected_groups = sorted(set(int(index) for index in group_indices))
+        if not selected_groups:
+            raise ValueError("group_indices cannot be empty")
+        if min(selected_groups) < 1 or max(selected_groups) > total_groups:
+            raise ValueError(
+                f"group_indices must be within [1, {total_groups}], got {selected_groups}"
+            )
+
+        self.freeze_backbone()
+
+        # Partition backbone blocks into evenly distributed 1-based groups.
+        block_count = len(blocks)
+        base_size = block_count // total_groups
+        remainder = block_count % total_groups
+
+        group_to_block_ids: List[List[int]] = []
+        start = 0
+        for group_id in range(1, total_groups + 1):
+            group_size = base_size + (1 if group_id <= remainder else 0)
+            end = start + group_size
+            group_to_block_ids.append(list(range(start, end)))
+            start = end
+
+        unfrozen_blocks = []
+        for group_id in selected_groups:
+            for block_id in group_to_block_ids[group_id - 1]:
+                if block_id < block_count:
+                    for param in blocks[block_id].parameters():
+                        param.requires_grad = True
+                    unfrozen_blocks.append(block_id)
+
+        logger.info(
+            "Backbone groups unfrozen: groups=%s total_groups=%d blocks=%s",
+            selected_groups,
+            total_groups,
+            unfrozen_blocks,
+        )
+
+    def _get_backbone_blocks(self) -> List[nn.Module]:
+        """Return backbone blocks in order for grouped selective unfreezing."""
+        if hasattr(self.backbone, "blocks"):
+            return list(self.backbone.blocks.children())
+        return []
 
     def to(self, device: torch.device | str) -> DiseaseClassifier:
         """Move model to specified device (CPU or GPU).
