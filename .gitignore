@@ -53,6 +53,8 @@ desktop.ini
 # Logs
 *.log
 logs/
+mlruns/
+mlflow.db
 
 # Data and model artifacts (large files)
 data/

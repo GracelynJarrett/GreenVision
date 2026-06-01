@@ -6,7 +6,9 @@
 
 ### Summary
 
-This log captures the first completed base model training run using EfficientNet-B0 with a frozen backbone for Phase 1 and fine-tuning for Phase 2.
+⚠️ **NOTE:** This run accidentally included Phase 2 (fine-tuning), even though it was labeled as base model training. The Phase 2 results (99.50% test accuracy) skewed the metrics. See the **True Base Model (Phase 1 Only)** section below for the actual Phase-1-only baseline.
+
+This log captures a training run using EfficientNet-B0 with a frozen backbone for Phase 1 and unintentional fine-tuning for Phase 2.
 
 ### Final Metrics
 
@@ -33,6 +35,32 @@ This log captures the first completed base model training run using EfficientNet
 - `models/class_to_idx.json` was saved for inference consistency.
 - `models/phase1_best.pth` and `models/phase2_best.pth` were produced during the run.
 - The run completed successfully on the CUDA-enabled GPU environment.
+
+## True Base Model (Phase 1 Only) Metrics
+
+**Run date:** 2026-05-31  
+**Run name:** `phase1_feature_extraction`  
+**MLflow run ID:** `feb3c08d14464d999a528f91bcca74ab`
+
+### Final Metrics
+
+| Split | Metric | Value |
+| --- | --- | ---: |
+| Phase 1 | Best validation loss | 0.2218 |
+| Phase 1 | Best validation accuracy | 92.46% |
+| Phase 1 | Final training loss | 0.4270 |
+| Phase 1 | Final training accuracy | 86.57% |
+| Test | Loss | 0.2248 |
+| Test | Accuracy | 92.38% |
+
+### Notes
+
+- This is the Phase-1-only base model retrained with Phase 2 removed from `config.yaml` and `src/train.py`.
+- Dataset size: 40,728 train images, 8,146 validation images, 5,431 test images.
+- All 38 classes preserved with `models/class_to_idx.json`.
+- Checkpoint saved to `models/phase1_best.pth` (best epoch: 7).
+- MLflow run: `phase1_feature_extraction` (`feb3c08d14464d999a528f91bcca74ab`).
+- These numbers replace the placeholder values and represent the true Phase‑1 baseline for downstream tuning.
 
 ## Tuning Model M2 Metrics
 

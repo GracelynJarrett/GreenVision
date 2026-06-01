@@ -15,7 +15,6 @@ paths:
   model_dir: models
   checkpoint_best: models/best_model.pth
   checkpoint_phase1: models/phase1_best.pth
-  checkpoint_phase2: models/phase2_best.pth
   class_to_idx: models/class_to_idx.json
   idx_to_class: models/idx_to_class.json
   logs_dir: logs
@@ -26,7 +25,6 @@ mlflow:
   tracking_uri: null
   ui_port: 5000
   run_name_phase1: phase1_feature_extraction
-  run_name_phase2: phase2_fine_tuning
   run_name_tuning_prefix: phase2_tuning
   log_system_metrics: true
   nested_runs: false
@@ -72,11 +70,7 @@ training:
     learning_rate: 0.001
     weight_decay: 0.0001
     freeze_backbone: true
-  phase2:
-    epochs: 8
-    learning_rate: 0.0001
-    weight_decay: 0.0001
-    unfreeze_backbone: true
+
   regularization:
     dropout: 0.5
     weight_decay: 0.0001
