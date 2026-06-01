@@ -61,8 +61,6 @@ def log_config_to_mlflow(cfg: Dict[str, Any]) -> None:
             "batch_size": cfg["training"].get("batch_size", 16),
             "phase1_epochs": cfg["training"].get("phase1", {}).get("epochs", 0),
             "phase1_learning_rate": cfg["training"].get("phase1", {}).get("learning_rate", 0.0),
-            "phase2_epochs": cfg["training"].get("phase2", {}).get("epochs", 0),
-            "phase2_learning_rate": cfg["training"].get("phase2", {}).get("learning_rate", 0.0),
             "mlflow_ui_port": cfg.get("mlflow", {}).get("ui_port", 5000),
         }
     )
@@ -119,16 +117,7 @@ def build_model_and_optimizer(cfg: Dict[str, Any], device: torch.device):
     return model, optimizer, criterion
 
 
-def build_phase_optimizer(cfg: Dict[str, Any], model: torch.nn.Module, phase_name: str) -> torch.optim.Optimizer:
-    """Build an optimizer for the requested training phase."""
-    phase_cfg = cfg["training"][phase_name]
-    learning_rate = phase_cfg.get("learning_rate", 1e-3)
-    weight_decay = phase_cfg.get("weight_decay", 1e-4)
-    return torch.optim.Adam(
-        filter(lambda param: param.requires_grad, model.parameters()),
-        lr=learning_rate,
-        weight_decay=weight_decay,
-    )
+
 
 
 def run_training_phase(
@@ -259,13 +248,13 @@ def log_final_artifacts(cfg: Dict[str, Any], logger: logging.Logger) -> None:
     artifact_paths = [
         cfg["paths"].get("class_to_idx", "models/class_to_idx.json"),
         cfg["paths"].get("checkpoint_phase1", "models/phase1_best.pth"),
-        cfg["paths"].get("checkpoint_phase2", "models/phase2_best.pth"),
     ]
 
     for artifact_path in artifact_paths:
         if artifact_path and os.path.isfile(artifact_path):
             mlflow.log_artifact(artifact_path)
             logger.info("Logged MLflow artifact: %s", artifact_path)
+
 
 
 def main(config_path: str):
@@ -311,28 +300,6 @@ def main(config_path: str):
         if phase1_metrics is not None:
             logger.info("Phase 1 complete. Best validation accuracy: %.2f", phase1_metrics["val_accuracy"])
 
-        phase2_cfg = cfg["training"].get("phase2", {})
-        phase2_epochs = int(phase2_cfg.get("epochs", 0))
-        if phase2_epochs > 0:
-            model.unfreeze_backbone()
-            phase2_optimizer = build_phase_optimizer(cfg, model, "phase2")
-            phase2_checkpoint = cfg["paths"].get("checkpoint_phase2", "models/phase2_best.pth")
-            phase2_metrics = run_training_phase(
-                cfg=cfg,
-                phase_name="phase2",
-                model=model,
-                train_loader=train_loader,
-                val_loader=val_loader,
-                criterion=criterion,
-                optimizer=phase2_optimizer,
-                device=device,
-                checkpoint_path=phase2_checkpoint,
-                logger=logger,
-            )
-
-            if phase2_metrics is not None:
-                logger.info("Phase 2 complete. Best validation accuracy: %.2f", phase2_metrics["val_accuracy"])
-
         test_batches = len(test_loader)
         logger.info("Test loader ready with %d batches. Class mapping saved for %d classes.", test_batches, len(class_to_idx))
 
@@ -351,8 +318,7 @@ def main(config_path: str):
 
         log_final_artifacts(cfg, logger)
 
-    # Further training orchestration (phase training loops, MLflow, early stopping)
-    # will be added in subsequent sections.
+    logger.info("Training complete.")
 
 
 if __name__ == "__main__":

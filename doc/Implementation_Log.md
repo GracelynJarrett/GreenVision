@@ -3,18 +3,35 @@
 This log tracks progress across branches and days. Each entry includes a summary of work completed since the last log. Newest entries appear at the top.
 ---
 
-## 2026-05-31 — Gracelyn — branch: phase2-tuning
+## 2026-05-31 — Gracelyn — branch: phase1-cleanup & tuning
 
-**Overview:** Completed all remaining tuning profiles (M3, M4, M5), selected M3 as the best model, and documented final model selection rationale in Model_metrix_Log.md.
+**Overview:** Trained tuning profiles M3 and M4, added validation and test entrypoints, implemented registry tooling and verification, cleaned `src/train.py` to be Phase‑1-only, and retrained the true Phase‑1 base model. Updated logs and docs to reflect final metrics and provenance.
 
-**Explanation:** Executed tuning profiles M3 (groups 4-6, best result at 99.41% test accuracy), M4 (groups 7-8, 95.73% test), and M5 (full backbone, 96.08% test) sequentially on GPU, with one interruption during M2 due to laptop power loss (successfully restarted). All runs completed with metrics automatically appended to `doc/Model_metrix_Log.md` by the tuning runner. Created a Model Comparison Summary table showing all models side-by-side and added a new "Final Model Selection: M3" section documenting why M3 was chosen: best tuning performance (99.41% test), excellent validation stability (99.40% best val, 0.0165 loss), and balanced backbone unfreezing strategy. Updated the metrics log to clarify that Base Phase 2 (99.50% test) is kept separate from tuning comparison per user decision, since Phase 2 included unplanned hyperparameter tuning not part of the original baseline.
+**Detailed explanation:**
+
+- Training: executed tuning runs for M3 and M4 (M3 remains the best tuning candidate). Saved checkpoints to `models/m3_best.pth` and `models/m4_best.pth`, with M3 showing superior validation/test performance in the tuning experiments.
+
+- New utilities: created `src/validate.py` (performs validation suite: confusion matrix, per-class accuracy, calibration plots), `src/test.py` (reproducible test-set evaluation runner), `src/register.py` (register + promote a checkpoint to MLflow Model Registry), and `src/verify.py` (load Production model and run a smoke inference). These scripts centralize validation, testing, and registry operations for reproducibility.
+
+- Cleanup & retrain: refactored `src/train.py` and `config.yaml` to remove Phase‑2 behavior from the Phase‑1 entrypoint, retrained the Phase‑1 base model to produce MLflow run `feb3c08d14464d999a528f91bcca74ab` and checkpoint `models/phase1_best.pth`. Logged metrics: phase1 train acc 86.57 (loss 0.4270), best val acc 92.46 (loss 0.2218), test acc 92.38 (loss 0.2248). Inserted these results into `doc/Model_metrix_Log.md` and added the Phase‑1 run ID to `doc/Training_Report.md`.
+
+- Documentation & provenance: updated `doc/Model_metrix_Log.md` (warning about earlier accidental Phase‑2 inclusion, True Base Model section), `doc/Training_Report.md` (added Phase‑1 run id), and `doc/Implementation_Log.md` (this consolidated entry).
 
 **Files touched:**
-- `logs/tune_m3.log`, `logs/tune_m4.log`, `logs/tune_m5.log` (runtime logs)
-- `models/m3_best.pth`, `models/m4_best.pth`, `models/m5_best.pth` (generated checkpoints)
-- `doc/Model_metrix_Log.md` (M3/M4/M5 metrics appended; added comparison table and Final Model Selection section)
 
-**Next step:** Create `phase3-validation` branch from current commit and set up formal validation workflow for M3 (confusion matrix, per-class accuracy, edge case inspection, prediction visualization).
+- `src/train.py` (cleaned Phase‑1 entrypoint)
+- `config.yaml` (removed Phase‑2 keys for Phase‑1 entrypoint)
+- `src/validate.py`, `src/test.py`, `src/register.py`, `src/verify.py` (new validation/test/registry scripts)
+- `doc/Model_metrix_Log.md`, `doc/Training_Report.md`, `doc/Implementation_Log.md` (updated)
+- `models/phase1_best.pth`, `models/m3_best.pth`, `models/m4_best.pth` (checkpoints)
+- `logs/train.log`, `logs/validation_report.json`, `logs/test_report.json`, `logs/tune_*.log` (artifacts)
+
+**Key run IDs:**
+
+- Phase‑1 retrain (true base): `feb3c08d14464d999a528f91bcca74ab`
+- M3 tuning (selected): `0efe2199c322443ca063487e01c3eb9d`
+
+**Next step:** Create a FastAPI inference service and server to serve the selected model (M3) and the true Phase‑1 baseline, and prepare deployment artifacts (requirements, Dockerfile, simple API routes for predict/health/status).
 
 ---
 
