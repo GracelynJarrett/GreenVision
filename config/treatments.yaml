@@ -1,0 +1,204 @@
+# GreenVision Disease Treatments & Recommendations
+# Format: raw_class_name -> {disease_name, treatment}
+# All treatment recommendations sourced from agricultural extension offices
+
+# ============================================================================
+# APPLE
+# ============================================================================
+Apple___Apple_scab:
+  disease_name: "Apple-Scab"
+  treatment: "Remove infected leaves and branches. Apply fungicide (sulfur or mancozeb) in early spring. Improve air circulation by pruning crowded branches."
+
+Apple___Black_rot:
+  disease_name: "Apple-Black Rot"
+  treatment: "Prune and burn infected branches. Remove cankers from trunk and limbs. Apply copper fungicide in spring and after rain. Ensure good drainage."
+
+Apple___Cedar_apple_rust:
+  disease_name: "Apple-Cedar Apple Rust"
+  treatment: "Remove nearby juniper/cedar trees if possible. Apply sulfur fungicide starting in spring before flowering. Remove galls from infected branches."
+
+Apple___healthy:
+  disease_name: "Apple-Healthy"
+  treatment: "Continue routine monitoring and preventive care. Maintain proper spacing and pruning for air circulation. Monitor for early signs of disease."
+
+# ============================================================================
+# BLUEBERRY
+# ============================================================================
+Blueberry___healthy:
+  disease_name: "Blueberry-Healthy"
+  treatment: "Continue routine monitoring and preventive care. Maintain soil pH between 4.5-5.5. Prune for air circulation and remove dead wood annually."
+
+# ============================================================================
+# CHERRY
+# ============================================================================
+Cherry___healthy:
+  disease_name: "Cherry-Healthy"
+  treatment: "Continue routine monitoring and preventive care. Prune in late winter. Maintain consistent watering and adequate spacing."
+
+Cherry___Powdery_mildew:
+  disease_name: "Cherry-Powdery Mildew"
+  treatment: "Remove heavily infected branches. Apply sulfur fungicide or potassium bicarbonate monthly starting in early summer. Improve air circulation by pruning."
+
+# ============================================================================
+# CORN
+# ============================================================================
+Corn___Cercospora_leaf_spot_Gray_leaf_spot:
+  disease_name: "Corn-Cercospora Leaf Spot"
+  treatment: "Plant disease-resistant varieties. Rotate crops (avoid corn-on-corn). Remove crop residue after harvest. Apply fungicide if disease appears before silking."
+
+Corn___Common_rust:
+  disease_name: "Corn-Common Rust"
+  treatment: "Plant resistant hybrid varieties. Apply fungicide (triazoles) if disease appears on lower leaves before silking. Monitor closely during warm, wet periods."
+
+Corn___healthy:
+  disease_name: "Corn-Healthy"
+  treatment: "Continue routine monitoring and preventive care. Ensure proper spacing and drainage. Scout weekly for pest and disease presence during growing season."
+
+Corn___Northern_Leaf_Blight:
+  disease_name: "Corn-Northern Leaf Blight"
+  treatment: "Plant resistant hybrids. Rotate crops and bury residue. Apply fungicide if disease occurs before silking. Improve air flow by reducing stand density if needed."
+
+# ============================================================================
+# GRAPE
+# ============================================================================
+Grape___Black_rot:
+  disease_name: "Grape-Black Rot"
+  treatment: "Remove infected shoots and fruit clusters immediately. Apply fungicide (mancozeb or sulfur) at bud break and every 14 days until veraison. Improve canopy air flow."
+
+Grape___Esca_Black_Measles:
+  disease_name: "Grape-Esca (Black Measles)"
+  treatment: "Remove infected vines if severely affected. Apply wound dressing to pruning cuts. Ensure good drainage and air circulation. Monitor for symptoms on remaining vines."
+
+Grape___healthy:
+  disease_name: "Grape-Healthy"
+  treatment: "Continue routine monitoring and preventive care. Prune during dormancy for optimal structure. Maintain consistent canopy management."
+
+Grape___Leaf_blight_Isariopsis_Leaf_Spot:
+  disease_name: "Grape-Leaf Blight"
+  treatment: "Remove infected leaves and canes. Apply fungicide (mancozeb) at pre-bloom and every 14 days until harvest. Improve air circulation through strategic pruning."
+
+# ============================================================================
+# ORANGE
+# ============================================================================
+Orange___Haunglongbing_Citrus_greening:
+  disease_name: "Orange-Huanglongbing (Citrus Greening)"
+  treatment: "Remove and destroy infected trees immediately. Manage insect vectors (psyllids) with insecticide. Maintain strict quarantine protocols. Plant HLB-resistant rootstocks."
+
+# ============================================================================
+# PEACH
+# ============================================================================
+Peach___Bacterial_spot:
+  disease_name: "Peach-Bacterial Spot"
+  treatment: "Remove infected shoots and fruit during dormancy. Apply copper fungicide in spring before budbreak and after rain. Avoid overhead irrigation; use drip irrigation."
+
+Peach___healthy:
+  disease_name: "Peach-Healthy"
+  treatment: "Continue routine monitoring and preventive care. Thin fruit annually for better production and reduced disease pressure. Maintain proper pruning height."
+
+# ============================================================================
+# PEPPER (BELL)
+# ============================================================================
+Pepper,_bell___Bacterial_spot:
+  disease_name: "Pepper-Bacterial Spot"
+  treatment: "Remove infected leaves and fruit. Use disease-free transplants. Apply copper fungicide at first sign of disease. Avoid overhead watering and leaf wetness."
+
+Pepper,_bell___healthy:
+  disease_name: "Pepper-Healthy"
+  treatment: "Continue routine monitoring and preventive care. Maintain consistent watering and mulch to retain moisture. Scout for pests and diseases weekly."
+
+# ============================================================================
+# POTATO
+# ============================================================================
+Potato___Early_blight:
+  disease_name: "Potato-Early Blight"
+  treatment: "Remove lower infected leaves. Apply fungicide (mancozeb or chlorothalonil) when disease first appears. Rotate crops. Mulch to prevent soil splash."
+
+Potato___healthy:
+  disease_name: "Potato-Healthy"
+  treatment: "Continue routine monitoring and preventive care. Ensure adequate drainage and spacing. Scout regularly for pests and disease symptoms."
+
+Potato___Late_blight:
+  disease_name: "Potato-Late Blight"
+  treatment: "Apply fungicide immediately when symptoms appear (use mancozeb or metalaxyl). Remove infected plants. Avoid overhead irrigation. Harvest early in hot weather."
+
+# ============================================================================
+# RASPBERRY
+# ============================================================================
+Raspberry___healthy:
+  disease_name: "Raspberry-Healthy"
+  treatment: "Continue routine monitoring and preventive care. Prune out dead and diseased canes annually in late winter. Maintain proper spacing for air flow."
+
+# ============================================================================
+# SOYBEAN
+# ============================================================================
+Soybean___healthy:
+  disease_name: "Soybean-Healthy"
+  treatment: "Continue routine monitoring and preventive care. Rotate crops annually. Scout regularly for disease and pest presence during growing season."
+
+# ============================================================================
+# SQUASH
+# ============================================================================
+Squash___Powdery_mildew:
+  disease_name: "Squash-Powdery Mildew"
+  treatment: "Apply sulfur fungicide at first sign of disease and repeat every 7-10 days. Remove heavily infected leaves. Improve air circulation by pruning vines."
+
+# ============================================================================
+# STRAWBERRY
+# ============================================================================
+Strawberry___healthy:
+  disease_name: "Strawberry-Healthy"
+  treatment: "Continue routine monitoring and preventive care. Remove runners and old leaves. Replace beds every 3-4 years to avoid disease buildup. Maintain good drainage."
+
+Strawberry___Leaf_scorch:
+  disease_name: "Strawberry-Leaf Scorch"
+  treatment: "Remove infected leaves and plant debris. Apply fungicide (captan or sulfur) if disease is severe. Improve air circulation. Avoid overhead irrigation."
+
+# ============================================================================
+# TOMATO
+# ============================================================================
+Tomato___Bacterial_spot:
+  disease_name: "Tomato-Bacterial Spot"
+  treatment: "Remove infected leaves and fruit. Use disease-free seed and transplants. Apply copper fungicide at first disease sign. Avoid overhead watering and leaf wetness."
+
+Tomato___Early_blight:
+  disease_name: "Tomato-Early Blight"
+  treatment: "Remove lower infected leaves proactively. Apply fungicide (mancozeb) starting when disease appears. Improve air circulation. Mulch to prevent soil splash."
+
+Tomato___healthy:
+  disease_name: "Tomato-Healthy"
+  treatment: "Continue routine monitoring and preventive care. Prune suckers for better air circulation. Scout weekly for pests and disease symptoms."
+
+Tomato___Late_blight:
+  disease_name: "Tomato-Late Blight"
+  treatment: "Remove infected foliage immediately. Apply fungicide (mancozeb or metalaxyl) at first sign. Ensure good air circulation and avoid overhead irrigation. Harvest early."
+
+Tomato___Leaf_Mold:
+  disease_name: "Tomato-Leaf Mold"
+  treatment: "Improve air circulation through pruning and spacing. Apply sulfur fungicide if needed. Avoid overhead watering. Remove infected leaves. Use resistant varieties."
+
+Tomato___Septoria_leaf_spot:
+  disease_name: "Tomato-Septoria Leaf Spot"
+  treatment: "Remove infected leaves regularly starting from the bottom. Apply fungicide (chlorothalonil or mancozeb) weekly. Avoid overhead watering. Improve air flow."
+
+Tomato___Spider_mites_Two-spotted_spider_mite:
+  disease_name: "Tomato-Spider Mites"
+  treatment: "Spray with miticide or insecticidal soap weekly if infestation occurs. Increase humidity to suppress mites. Remove heavily infested leaves. Monitor underside of leaves."
+
+Tomato___Target_Spot:
+  disease_name: "Tomato-Target Spot"
+  treatment: "Remove infected leaves. Apply fungicide (chlorothalonil or mancozeb) at first sign. Improve air circulation through pruning. Avoid overhead watering and wet foliage."
+
+Tomato___Tomato_mosaic_virus:
+  disease_name: "Tomato-Tomato Mosaic Virus"
+  treatment: "Remove and destroy infected plants. Wash hands and tools between plants. Use virus-resistant varieties. Control aphids and whiteflies that may spread virus. No cure; prevention is key."
+
+Tomato___Tomato_Yellow_Leaf_Curl_Virus:
+  disease_name: "Tomato-TYLCV"
+  treatment: "Remove and destroy infected plants immediately. Control whitefly vectors with insecticide. Use resistant varieties. Establish virus-free source plants. Quarantine infected plants."
+
+# ============================================================================
+# BACKGROUND
+# ============================================================================
+Background_without_leaves:
+  disease_name: "Background/No Leaf"
+  treatment: "Image does not contain a plant leaf. Please submit an image of an actual leaf for analysis."
