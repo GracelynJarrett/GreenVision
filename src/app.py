@@ -8,6 +8,18 @@ import pandas as pd
 # ===============================
 API_URL = "http://localhost:8001/predict"
 
+# ===============================
+# HEALTH CHECK
+# ===============================
+try:
+    health = requests.get(API_URL.replace("/predict", "/health"))
+
+    if health.status_code != 200:
+        st.error("❌ API is running but not healthy")
+
+except:
+    st.error("🚫 FastAPI server is not running. Please start the API.")
+
 st.set_page_config(page_title="GreenVision", layout="centered")
 
 # Session state for history
@@ -20,6 +32,10 @@ if "history" not in st.session_state:
 st.title("🌿 GreenVision")
 st.write("Upload a plant leaf image to detect disease and get treatment recommendations.")
 
+
+st.caption(
+    "⚠️ This tool is for educational purposes only and should not replace professional agricultural advice."
+)
 st.caption(
     "This model performs best on clear, centered leaf images. "
     "Performance may drop on real-world images due to dataset differences."
