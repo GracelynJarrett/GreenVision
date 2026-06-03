@@ -18,6 +18,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 from PIL import Image
 from torchvision import transforms
+from io import BytesIO
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -124,29 +125,50 @@ def load_model_and_artifacts() -> tuple:
         logger.info(f"Using device: {device}")
         
         # Load model from MLflow Registry
-        model = mlflow.pytorch.load_model(f"models:/{MODEL_VERSION}/{MODEL_VERSION}")
+        model = mlflow.pytorch.load_model("models:/GreenVision/Production")
         model.to(device)
         model.eval()  # Set to evaluation mode
         logger.info(f"Model loaded successfully from MLflow ({MODEL_VERSION})")
         
-        # Load and invert class_to_idx from MLflow artifacts
-        logger.info("Loading class mappings from MLflow artifacts...")
-        client = mlflow.MlflowClient()
+   #     # Load and invert class_to_idx from MLflow artifacts
+  #      logger.info("Loading class mappings from MLflow artifacts...")
+   #     client = mlflow.MlflowClient()
         
         # Get the latest Production version info
-        versions = client.get_registered_model("GreenVision").latest_versions
-        production_version = next(v for v in versions if v.version == MODEL_VERSION or v.current_stage == "Production")
+   #     versions = client.get_registered_model("GreenVision").latest_versions
+   #     production_version = next(v for v in versions if v.version == MODEL_VERSION or v.current_stage == "Production")
         
         # Construct artifact URI and download class_to_idx.json
-        artifact_uri = production_version.source
-        artifact_path = mlflow.artifacts.download_artifacts(
-            artifact_uri=artifact_uri,
-            dst_path="/tmp/mlflow_artifacts"
-        )
+    #    artifact_uri = production_version.source
+    #    artifact_path = mlflow.artifacts.download_artifacts(
+    #        artifact_uri=artifact_uri,
+   #         dst_path="/tmp/mlflow_artifacts"
+   #     )
         
-        class_to_idx_path = Path(artifact_path) / "class_to_idx.json"
+   #     class_to_idx_path = Path(artifact_path) / "class_to_idx.json"
+   #     with open(class_to_idx_path, "r") as f:
+        #    class_to_idx = json.load(f)
+        
+      # ===========================  
+        # new added secion
+      # ==============================
+      
+      # Load class_to_idx locally
+        logger.info("Loading class mappings from local file...")
+
+        class_to_idx_path = PROJECT_ROOT / "models" / "class_to_idx.json"
+
         with open(class_to_idx_path, "r") as f:
             class_to_idx = json.load(f)
+
+        # Invert mapping
+        idx_to_class = {int(v): k for k, v in class_to_idx.items()}
+
+        logger.info(f"Loaded {len(idx_to_class)} class mappings")  
+        
+        
+        
+        
         
         # Invert to create idx_to_class mapping
         idx_to_class = {int(v): k for k, v in class_to_idx.items()}
@@ -157,6 +179,10 @@ def load_model_and_artifacts() -> tuple:
         with open(TREATMENTS_PATH, "r") as f:
             treatments = yaml.safe_load(f)
         logger.info(f"Loaded treatments for {len(treatments)} disease classes")
+        
+        # Load treatments YAML
+        with open(TREATMENTS_PATH, "r") as f:
+            treatments = yaml.safe_load(f)
         
         return model, idx_to_class, treatments, device
     
@@ -182,9 +208,15 @@ def get_validation_transforms() -> transforms.Compose:
         torchvision.transforms.Compose object.
     """
     return transforms.Compose([
-        transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+        
+    transforms.Resize(256),
+        transforms.CenterCrop(224),
         transforms.ToTensor(),
-        transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+        transforms.Normalize(
+            mean=IMAGENET_MEAN,
+            std=IMAGENET_STD
+        )
+
     ])
 
 
@@ -203,22 +235,17 @@ def preprocess_image(image: Image.Image) -> torch.Tensor:
     Raises:
         ValueError: If image cannot be converted to RGB.
     """
-    try:
-        # Convert to RGB if grayscale
-        if image.mode != "RGB":
-            image = image.convert("RGB")
-        
-        # Apply transforms
-        transform = get_validation_transforms()
-        tensor = transform(image)
-        
-        # Add batch dimension
-        tensor = tensor.unsqueeze(0)
-        
-        return tensor
-    except Exception as e:
-        logger.error(f"Preprocessing failed: {e}")
-        raise ValueError(f"Failed to preprocess image: {e}")
+   
+  # Ensure 3 channels
+    image = image.convert("RGB")
+
+    # Apply transforms
+    transform = get_validation_transforms()
+    tensor = transform(image)
+
+    # Add batch dimension
+    return tensor.unsqueeze(0)
+
 
 
 # ============================================================================
@@ -270,42 +297,88 @@ async def health_check() -> Dict:
     Returns:
         JSON with status, model_loaded, model_version, and num_classes.
     """
-    # Placeholder: will be implemented next
-    pass
-
+    
+    return {
+        "status": "ok",
+        "model_loaded": model is not None,
+        "model_version": MODEL_VERSION,
+    }
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)) -> Dict:
-    """
-    Predict disease from uploaded image.
-    
-    Validates file, preprocesses image, runs inference, and returns
-    disease prediction with confidence, plant type, and treatment.
-    
-    Response format:
-    {
-        "plant_type": "Tomato",
-        "disease": "Late blight",
-        "confidence": 0.94,
-        "low_confidence": false,
-        "is_healthy": false,
-        "treatment": "Remove affected foliage; apply copper fungicide...",
-        "model_version": "Production",
-        "raw_class": "Tomato___Late_blight"
-    }
-    
-    Args:
-        file: Uploaded image file (multipart/form-data).
-    
-    Returns:
-        JSON with plant_type, disease, confidence, low_confidence,
-        is_healthy, treatment, model_version, raw_class.
-    
-    Raises:
-        HTTPException: For invalid files, corruption, or inference errors.
-    """
-    # Placeholder: will be implemented next
-    pass
+    try:
+        # ✅ Read image
+        contents = await file.read()
+        image = Image.open(BytesIO(contents))
+
+        # ✅ Preprocess
+        input_tensor = preprocess_image(image)
+        input_tensor = input_tensor.to(device)
+
+        # ✅ Run model
+        with torch.no_grad():
+            outputs = model(input_tensor)
+            probs = torch.softmax(outputs, dim=1)
+
+        # ✅ Top-5 predictions
+        top_probs, top_indices = torch.topk(probs, 5)
+
+        top_predictions = []
+        for prob, idx in zip(top_probs[0], top_indices[0]):
+            class_name = idx_to_class[idx.item()]
+            top_predictions.append({
+                "class": class_name,
+                "confidence": float(prob.item())
+            })
+
+        # ✅ Top-1 prediction (FIXED ORDER)
+        confidence_tensor, predicted_idx_tensor = torch.max(probs, dim=1)
+
+        confidence = float(confidence_tensor.item())
+        predicted_idx = int(predicted_idx_tensor.item())
+
+        predicted_class = idx_to_class[predicted_idx]   # ✅ FIX (no .item())
+
+        # ✅ Treatment lookup
+        treatment_info = treatments.get(predicted_class, {})
+        plant = predicted_class.split("___")[0]
+
+        # ✅ FIX: define disease_name
+        disease_name = treatment_info.get("disease_name", predicted_class)
+
+        
+       # ✅ Case 1: Background / Not a plant
+        if predicted_class == "Background_without_leaves":
+            return {
+                "plant": "Unknown",
+                "disease": "Not a plant",
+                "confidence": confidence,
+                "treatment": "This image does not appear to contain a plant leaf.",
+                "top_predictions": top_predictions
+                }
+
+        # ✅ Case 2: Low confidence (uncertain prediction)
+        elif confidence < CONFIDENCE_THRESHOLD:
+            return {
+                "plant": "Unknown",
+                "disease": "Uncertain",
+                "confidence": confidence,
+                "treatment": "The model is not confident. Please upload a clearer image of a leaf.",
+                "top_predictions": top_predictions
+                }
+
+        # ✅ Case 3: Normal valid prediction
+        return {
+            "plant": plant,
+            "disease": disease_name,
+            "confidence": confidence,
+            "treatment": treatment_info.get("treatment", "No treatment available."),
+            "top_predictions": top_predictions
+            }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 if __name__ == "__main__":
