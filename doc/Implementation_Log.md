@@ -1,7 +1,49 @@
 # Implementation Log
 
 This log tracks progress across branches and days. Each entry includes a summary of work completed since the last log. Newest entries appear at the top.
+
 ---
+## 2026-06-02 — Gracelyn — branch: Phase3_serve_streamlit
+Overview: Completed the FastAPI inference endpoint, aligned preprocessing between training and inference, and built a fully functional Streamlit dashboard with improved robustness, explainability, and user interaction.
+Explanation: I implemented the /predict endpoint in serve.py, enabling real-time inference by handling image uploads, validating input, preprocessing images, running model predictions, and returning structured JSON output. A key improvement during this phase was ensuring that the inference preprocessing pipeline (resize, center crop, and ImageNet normalization) matched the training pipeline, which resolved inconsistencies between model performance during training and real-world usage.
+During testing, I discovered that the model achieved high accuracy on validation and test datasets but performed poorly on real-world images. Further investigation showed that this was due to dataset bias rather than normalization issues—the training, validation, and test data shared very similar distributions, causing the model to learn dataset-specific patterns instead of generalizable features.
+To improve robustness, I added a confidence threshold (40%) in the backend to flag low-confidence predictions as “Uncertain.” I also implemented detection for non-plant images using the background class, allowing the system to return a “Not a plant” response instead of forcing incorrect classifications. This effectively introduced a basic open-set handling mechanism.
+On the frontend, I developed a Streamlit dashboard that connects to the FastAPI service and provides an interactive interface for uploading images and viewing results. The UI includes image preview, structured diagnosis output (plant, disease, confidence), and conditional status messaging for valid predictions, low confidence cases, and non-plant inputs. I redesigned the treatment display using styled components for better readability and added guidance messages to improve usability.
+For model explainability, I extended the backend to return top-5 predictions and aggregated plant-type probabilities. These were visualized in the Streamlit app using bar charts, along with additional confidence visualizations such as a confidence meter and threshold comparison. I also implemented a prediction history feature to track user interactions within the session.
+The final system integrates model training assumptions, preprocessing alignment, API serving, and a user-facing dashboard, demonstrating a complete end-to-end machine learning pipeline with improved real-world reliability and interpretability.
+Files touched:
+
+src/serve.py (implemented /predict, aligned preprocessing, added confidence threshold, background detection, top-5 predictions, and structured outputs)
+src/app.py (built Streamlit dashboard, added UI enhancements, conditional messaging, graphs, and history tracking)
+config/treatments.yaml (used for mapping predictions to disease names and treatment recommendations)
+
+Next step: Prepare presentation materials by documenting model behavior differences between dataset and real-world inputs, collecting representative test cases (correct, incorrect, and non-plant), and finalizing slides for project presentation.
+---
+
+
+
+---
+## 2026-06-02 — Gracelyn — branch: FastAPI_Serve
+
+**Overview:** Completed the FastAPI inference endpoint and built a fully functional Streamlit dashboard with enhanced model explainability and user experience improvements.
+
+**Explanation:** I implemented the `/predict` endpoint in `serve.py`, enabling real-time inference by accepting uploaded images, validating input types and sizes, preprocessing images, running model predictions, and returning structured JSON results. I added logic to detect non-leaf images using the background class and introduced confidence-based validation to flag low-confidence predictions. I also cleaned the treatment output by extracting only the relevant recommendation text from the YAML configuration.
+
+On the frontend, I developed a Streamlit dashboard that connects to the FastAPI service and provides an interactive user interface for uploading images and viewing results. The UI includes image preview, structured diagnosis output (plant type, disease, confidence, and health status), and a redesigned treatment display using styled components for improved readability. I added user guidance messaging to improve usability and ensured that results and visualizations only appear after prediction is triggered.
+
+To improve model transparency and interpretability, I extended the backend to return top-5 disease predictions and aggregated plant-type probabilities. These were visualized in the Streamlit app using bar charts, alongside additional confidence visualizations such as a confidence meter and threshold comparison. Layout improvements were made to separate sections clearly and enhance overall readability.
+
+The final system integrates model inference, API serving, and a user-facing dashboard, providing a complete end-to-end machine learning application.
+
+**Files touched:**
+- `src/serve.py` (implemented `/predict`, added validation, top-5 predictions, plant aggregation, treatment formatting)
+- `src/app.py` (created Streamlit dashboard, added UI improvements, graphs, and API integration)
+- `config/treatments.yaml` (used for treatment recommendations, no structural changes required)
+
+**Next step:** Prepare final testing and documentation by selecting representative test and real-world images, capturing example predictions, and finalizing project submission materials.
+
+---
+
 
 ## 2026-05-31 — Gracelyn — branch: phase1-cleanup & tuning
 
